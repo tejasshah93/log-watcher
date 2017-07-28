@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Log Watcher</title>
+</head>
+<!-- <script type="text/javascript" src="js/jquery-1.12.1.min.js"></script> -->
+<script src="http://code.jquery.com/jquery-1.12.1.min.js"></script>
+<script src="/socket.io/socket.io.js"></script> 
+<body>
+<h3 align="center">Log Watcher | tail -f</h3>
+<div id="buffer">
+	<pre></pre>
+</div>
+
+<script type="text/javascript">
+var bufferText = $("#buffer pre");
+var port = 9000;
+var socket = io.connect(null, port);
+
+socket
+	.on('connected', function (data) {
+		console.log("client connected");
+	})
+
+	.on('ioerror', function (data) {
+		bufferText.html(data);  		
+	})
+
+	.on('initFileData', function (data) {
+		bufferText.html(data);
+	})
+
+	.on('streamFileData', function (data) {
+		bufferText.append(data);
+	})
+
+	.on('fileTruncate', function (data) {
+		alert("File truncated on server. Reloading the page for new file instance");
+		window.location.reload();
+	});
+
+var watchFile = function() {
+	var file = window.location.pathname.substr(1);
+	if (file != '') {
+		socket.emit('watchFile', {filename: file});
+	}
+	else {
+		bufferText.html("Enter filename in the URL. For e.g. 'http://localhost:9000/log' to watch the file 'log'");
+	}
+};
+
+watchFile();
+
+</script>
+</body>
+</html>

@@ -1,0 +1,2 @@
+Test File
+Can append to text to this file using `$ echo "sometext-here" >> log`
